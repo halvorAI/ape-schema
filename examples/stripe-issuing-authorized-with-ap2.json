@@ -1,0 +1,84 @@
+{
+  "ape_version": "0.1",
+  "id": "evt_01JA8R2M7D0F3G6H9J2K5L8N1P",
+  "type": "payment.authorized",
+  "occurred_at": "2026-10-17T10:02:44.910Z",
+  "environment": "test",
+  "source": {
+    "id": "src_01JA8P1A2B3C4D5E6F7G8H9J0K",
+    "sdk": "@halvorai/ingest@0.1.0",
+    "adapter": "stripe-issuing"
+  },
+  "agent": {
+    "id": "agt_travel_12",
+    "name": "Travel booking agent",
+    "framework": "google-adk",
+    "kya": {
+      "provider": "visa-tap",
+      "subject": "tap-key-7f1c",
+      "assurance": "registered"
+    }
+  },
+  "owner": {
+    "id": "own_u_4410",
+    "type": "person",
+    "country": "US"
+  },
+  "instruction": {
+    "id": "ins_8890",
+    "hash": "sha256:ba726dd8ab1c1abbad0cdc31cd2ae3be0f9ea3bec7278a738030f0157e76afad",
+    "summary": "Book a return flight to Austin under $500 for next Friday.",
+    "channel": "chat"
+  },
+  "payment": {
+    "payment_id": "iauth_1QxYz2AbCdEfGh",
+    "rail": "card",
+    "amount": {
+      "value": "41200",
+      "unit": "minor",
+      "currency": "USD"
+    },
+    "status": "authorized",
+    "description": "Return flight SFO-AUS",
+    "category": "mcc:4511",
+    "rail_ref": {
+      "authorization_id": "iauth_1QxYz2AbCdEfGh",
+      "processor": "stripe-issuing"
+    }
+  },
+  "payee": {
+    "type": "merchant",
+    "name": "Example Airways",
+    "id": "acq_000123456789",
+    "country": "US",
+    "mcc": "4511",
+    "website": "https://example-airways.com"
+  },
+  "instrument": {
+    "type": "card",
+    "network": "visa",
+    "last4": "4242",
+    "issuer": "Stripe Issuing"
+  },
+  "evidence": [
+    {
+      "kind": "ap2.payment_mandate",
+      "format": "kb-sd-jwt",
+      "value": "eyJhbGciOiJFUzI1NiIsInR5cCI6InZjK3NkLWp3dCJ9.<payload>.<sig>~<disclosure>~<kb-jwt>",
+      "sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "kind": "tap.signature",
+      "format": "http-signature",
+      "value": {
+        "signature_input": "sig2=(\"@authority\" \"@path\");created=1792231364;expires=1792231844;keyId=\"tap-key-7f1c\";alg=\"ed25519\";nonce=\"e8N7S2MFd\";tag=\"agent-payer-auth\"",
+        "signature": "sig2=:jdq0SqOwHdyHr9+r5jw3iYZH6aNGKijYp/EstF4RQTQdi5N5YYKrD+mCT1HA1nZDsi6nJKuHxUi/5Syp3rLWBA==:",
+        "components": {
+          "@authority": "example-airways.com",
+          "@path": "/checkout"
+        }
+      },
+      "sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ]
+}

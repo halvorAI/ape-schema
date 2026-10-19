@@ -1,0 +1,860 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.halvorai.com/ape/v0.1.json",
+  "title": "Agent Payment Event",
+  "description": "Rail-neutral, attributed record of one AI agent payment event. Apache-2.0.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ape_version",
+    "id",
+    "type",
+    "occurred_at",
+    "environment",
+    "source",
+    "agent",
+    "owner",
+    "payment",
+    "payee"
+  ],
+  "properties": {
+    "ape_version": {
+      "const": "0.1"
+    },
+    "id": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 8
+    },
+    "type": {
+      "enum": [
+        "payment.requested",
+        "payment.authorized",
+        "payment.settled",
+        "payment.failed",
+        "payment.refunded",
+        "payment.disputed"
+      ]
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "environment": {
+      "enum": [
+        "test",
+        "live"
+      ]
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "id",
+        "sdk",
+        "adapter"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "sdk": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "adapter": {
+          "enum": [
+            "stripe",
+            "stripe-issuing",
+            "x402-client",
+            "x402-server",
+            "mpp-server",
+            "mcp",
+            "manual",
+            "custom"
+          ]
+        }
+      }
+    },
+    "agent": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "framework": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "version": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "key_thumbprint": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "kya": {
+          "type": "object",
+          "required": [
+            "provider",
+            "subject"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "provider": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "subject": {
+              "type": "string",
+              "maxLength": 256
+            },
+            "assurance": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "verified_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        }
+      }
+    },
+    "owner": {
+      "type": "object",
+      "required": [
+        "id",
+        "type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "type": {
+          "enum": [
+            "person",
+            "business"
+          ]
+        },
+        "display_name": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "country": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$"
+        },
+        "kyc_ref": {
+          "type": "string",
+          "maxLength": 128
+        }
+      }
+    },
+    "instruction": {
+      "type": "object",
+      "required": [
+        "id",
+        "hash"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "summary": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "channel": {
+          "enum": [
+            "chat",
+            "api",
+            "schedule",
+            "email",
+            "agent",
+            "other"
+          ]
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "tool_call_id": {
+          "type": "string",
+          "maxLength": 128
+        }
+      }
+    },
+    "payment": {
+      "type": "object",
+      "required": [
+        "payment_id",
+        "rail",
+        "amount",
+        "status",
+        "rail_ref"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "payment_id": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "rail": {
+          "enum": [
+            "stripe",
+            "card",
+            "x402",
+            "mpp",
+            "stablecoin",
+            "bank_transfer"
+          ]
+        },
+        "amount": {
+          "type": "object",
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "string",
+              "pattern": "^(0|[1-9][0-9]*)$"
+            },
+            "unit": {
+              "enum": [
+                "minor",
+                "atomic"
+              ]
+            },
+            "currency": {
+              "type": "string",
+              "pattern": "^[A-Z]{3}$"
+            },
+            "asset": {
+              "type": "object",
+              "required": [
+                "network",
+                "address"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "network": {
+                  "type": "string",
+                  "pattern": "^[-a-z0-9]{3,8}:[-_a-zA-Z0-9]{1,32}$",
+                  "description": "CAIP-2 chain id"
+                },
+                "address": {
+                  "type": "string",
+                  "maxLength": 128
+                },
+                "symbol": {
+                  "type": "string",
+                  "maxLength": 16
+                },
+                "decimals": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 36
+                }
+              }
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "unit": {
+                    "const": "minor"
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "currency"
+                ]
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "unit": {
+                    "const": "atomic"
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "asset"
+                ]
+              }
+            }
+          ]
+        },
+        "status": {
+          "enum": [
+            "requested",
+            "authorized",
+            "settled",
+            "failed",
+            "refunded",
+            "disputed"
+          ]
+        },
+        "failure_reason": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "category": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "rail_ref": {
+          "type": "object"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "rail": {
+                "const": "stripe"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "rail_ref": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "account": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "payment_intent": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "charge": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "refund": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "dispute": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "shared_payment_token": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "rail": {
+                "const": "card"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "rail_ref": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "authorization_id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "transaction_id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "network_transaction_id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "processor": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "rail": {
+                "const": "x402"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "rail_ref": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "scheme": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "network": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "nonce": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "tx_hash": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "facilitator": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "payment_flow": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "rail": {
+                "const": "mpp"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "rail_ref": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "method": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "challenge_id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "payment_intent": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "tx_hash": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "rail": {
+                "const": "stablecoin"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "rail_ref": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "network": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "tx_hash": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "log_index": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "rail": {
+                "const": "bank_transfer"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "rail_ref": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "scheme": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "end_to_end_id": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  },
+                  "pisp": {
+                    "type": [
+                      "string",
+                      "integer"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "failed"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "failure_reason"
+            ]
+          }
+        }
+      ]
+    },
+    "payee": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "merchant",
+            "api_provider",
+            "wallet",
+            "business",
+            "person"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "website": {
+          "type": "string",
+          "format": "uri"
+        },
+        "country": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$"
+        },
+        "mcc": {
+          "type": "string",
+          "pattern": "^[0-9]{4}$"
+        },
+        "wallet": {
+          "type": "object",
+          "required": [
+            "network",
+            "address"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "network": {
+              "type": "string",
+              "pattern": "^[-a-z0-9]{3,8}:[-_a-zA-Z0-9]{1,32}$",
+              "description": "CAIP-2 chain id"
+            },
+            "address": {
+              "type": "string",
+              "maxLength": 128
+            }
+          }
+        },
+        "resource_url": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "name"
+          ]
+        },
+        {
+          "required": [
+            "wallet"
+          ]
+        },
+        {
+          "required": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "instrument": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "card",
+            "agentic_token",
+            "stripe_spt",
+            "wallet",
+            "bank_account"
+          ]
+        },
+        "network": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "last4": {
+          "type": "string",
+          "pattern": "^[0-9]{4}$"
+        },
+        "par": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "token_ref": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "wallet": {
+          "type": "object",
+          "required": [
+            "network",
+            "address"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "network": {
+              "type": "string",
+              "pattern": "^[-a-z0-9]{3,8}:[-_a-zA-Z0-9]{1,32}$",
+              "description": "CAIP-2 chain id"
+            },
+            "address": {
+              "type": "string",
+              "maxLength": 128
+            }
+          }
+        },
+        "issuer": {
+          "type": "string",
+          "maxLength": 128
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "maxItems": 16,
+      "items": {
+        "type": "object",
+        "required": [
+          "kind",
+          "format",
+          "sha256"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "ap2.payment_mandate",
+              "ap2.checkout_mandate",
+              "vi.chain",
+              "tap.signature",
+              "x402.payment_payload",
+              "x402.settlement",
+              "mpp.receipt",
+              "stripe.object",
+              "agentic_token.metadata",
+              "kya.attestation"
+            ]
+          },
+          "format": {
+            "enum": [
+              "sd-jwt",
+              "kb-sd-jwt",
+              "jws",
+              "http-signature",
+              "json"
+            ]
+          },
+          "value": {
+            "type": [
+              "string",
+              "object"
+            ]
+          },
+          "uri": {
+            "type": "string",
+            "format": "uri"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "captured_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "oneOf": [
+          {
+            "required": [
+              "value"
+            ]
+          },
+          {
+            "required": [
+              "uri"
+            ]
+          }
+        ]
+      }
+    },
+    "related": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "previous_event_id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "corrects_event_id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "session_id": {
+          "type": "string",
+          "maxLength": 128
+        }
+      }
+    },
+    "labels": {
+      "type": "object",
+      "maxProperties": 20,
+      "propertyNames": {
+        "maxLength": 64
+      },
+      "additionalProperties": {
+        "type": "string",
+        "maxLength": 256
+      }
+    }
+  }
+}

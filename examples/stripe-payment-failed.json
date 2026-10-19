@@ -1,0 +1,43 @@
+{
+  "ape_version": "0.1",
+  "id": "evt_01JA8S9X4C6V8B0N2M4Q6W8E0R",
+  "type": "payment.failed",
+  "occurred_at": "2026-10-17T11:40:12.004Z",
+  "environment": "test",
+  "source": {
+    "id": "src_01JA8P2Q3W4E5R6T7Y8U9I0O1P",
+    "sdk": "@halvorai/ingest@0.1.0",
+    "adapter": "stripe"
+  },
+  "agent": {
+    "id": "agt_procure_03",
+    "name": "Procurement agent"
+  },
+  "owner": {
+    "id": "own_acme_ltd",
+    "type": "business"
+  },
+  "payment": {
+    "payment_id": "pi_3QxAbCdEfGhIjKlM",
+    "rail": "stripe",
+    "amount": {
+      "value": "230000",
+      "unit": "minor",
+      "currency": "USD"
+    },
+    "status": "failed",
+    "failure_reason": "card_declined",
+    "rail_ref": {
+      "payment_intent": "pi_3QxAbCdEfGhIjKlM",
+      "shared_payment_token": "spt_1QxNoPqRsTuV"
+    }
+  },
+  "payee": {
+    "type": "merchant",
+    "name": "Northwind Office Supply",
+    "id": "acct_1Nw0rTh"
+  },
+  "instrument": {
+    "type": "stripe_spt"
+  }
+}
