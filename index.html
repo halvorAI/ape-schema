@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Payment Event (APE) schema · HalvorAI</title>
+<meta name="description" content="APE: an open, rail-neutral JSON Schema for AI agent payments, mapped to AP2, Verifiable Intent, Visa TAP and x402. Apache-2.0.">
+<link rel="canonical" href="https://github.com/halvorai/ape-schema">
+<style>
+  :root { --bg:#fafaf9; --fg:#1c1c1c; --muted:#5f5f5f; --line:#e4e4e2; --accent:#1c1c1c; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#141414; --fg:#ededed; --muted:#a3a3a3; --line:#2a2a2a; --accent:#ededed; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  main { max-width:720px; margin:0 auto; padding:56px 16px 72px; }
+  .eyebrow { font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin:0 0 8px; }
+  h1 { font-size:32px; line-height:1.2; margin:0 0 12px; }
+  p.lead { color:var(--muted); margin:0 0 32px; }
+  h2 { font-size:15px; margin:32px 0 8px; }
+  ul { list-style:none; padding:0; margin:0; border-top:1px solid var(--line); }
+  li { border-bottom:1px solid var(--line); padding:12px 0; display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  a { color:var(--accent); }
+  code { font:13px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  .muted { color:var(--muted); font-size:14px; }
+  footer { margin-top:48px; color:var(--muted); font-size:14px; }
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Open schema · v0.1 draft · Apache-2.0</p>
+  <h1>Agent Payment Event (APE)</h1>
+  <p class="lead">An open, rail-neutral record of one AI agent payment: which agent paid, for whom, on whose instruction, on which rail, and the network proofs that came with it.</p>
+
+  <h2>Schema</h2>
+  <ul>
+    <li><a href="ape/v0.1.json"><code>ape/v0.1.json</code></a><span class="muted">JSON Schema 2020-12</span></li>
+  </ul>
+
+  <h2>Docs</h2>
+  <ul>
+    <li><a href="https://github.com/halvorai/ape-schema/blob/main/docs/FIELDS.md">Fields</a><span class="muted">Every field, generated from the schema</span></li>
+    <li><a href="https://github.com/halvorai/ape-schema/blob/main/docs/MAPPINGS.md">Mappings</a><span class="muted">AP2, Verifiable Intent, Visa TAP, x402, MPP, Stripe</span></li>
+    <li><a href="https://github.com/halvorai/ape-schema/blob/main/CHANGELOG.md">Changelog</a><span class="muted">Version history</span></li>
+  </ul>
+
+  <h2>Examples</h2>
+  <ul>
+    <li><a href="examples/x402-settled.json"><code>x402-settled.json</code></a><span class="muted">Settled x402 payment</span></li>
+    <li><a href="examples/stripe-issuing-authorized-with-ap2.json"><code>stripe-issuing-authorized-with-ap2.json</code></a><span class="muted">Card authorization with AP2 evidence</span></li>
+    <li><a href="examples/stripe-payment-failed.json"><code>stripe-payment-failed.json</code></a><span class="muted">Failed Stripe payment</span></li>
+  </ul>
+
+  <h2>Propose a change</h2>
+  <p class="muted">If your rail, wallet or Know Your Agent product needs a field, <a href="https://github.com/halvorai/ape-schema/issues">open an issue</a>.</p>
+
+  <footer>
+    <a href="https://github.com/halvorai/ape-schema">GitHub</a> ·
+    <a href="https://docs.halvorai.com/schema/">Docs</a> ·
+    <a href="https://halvorai.com/?utm_source=schema&amp;utm_campaign=ape_schema">HalvorAI</a>
+  </footer>
+</main>
+</body>
+</html>
