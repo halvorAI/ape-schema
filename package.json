@@ -1,0 +1,14 @@
+{
+  "name": "ape-schema-conformance",
+  "private": true,
+  "type": "module",
+  "description": "Checks APE conformance cases and test vectors against ape/v0.1.json.",
+  "scripts": {
+    "test": "node scripts/check-conformance.mjs"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "jose": "^6.0.0"
+  }
+}

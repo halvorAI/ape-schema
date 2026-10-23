@@ -30,7 +30,9 @@ const validate = ajv.compile(schema);
 if (!validate(event)) console.error(validate.errors);
 ```
 
-JSON Schema cannot express every rule. Receivers should also reject free-text fields that contain a Luhn-valid 13 to 19 digit sequence (a possible card number).
+JSON Schema cannot express every rule. Receivers must also reject an event whose free-text fields contain a possible card number (a Luhn-valid run of 13 to 19 digits). [`docs/FIELDS.md`](docs/FIELDS.md#cross-field-rules) lists exactly which fields are free text.
+
+[`conformance/`](conformance/) holds events every implementation must accept or reject, plus signing and canonical-JSON test vectors. SDKs and receivers should run them in their own tests.
 
 ## Signing
 
@@ -38,7 +40,7 @@ An envelope is `{ "event": { ... }, "sig": "<detached JWS>" }`. The JWS header i
 
 ## Versioning
 
-`ape_version` is `MAJOR.MINOR`. Minor versions only add optional fields. Receivers must ignore unknown keys in `labels`, `rail_ref` and `evidence[].value`, and reject unknown top-level fields. v0.x may change between minors until v1.0.
+`ape_version` is `MAJOR.MINOR`. Minor versions only add optional fields, and receivers pick the schema by `ape_version`. Within a version, unknown top-level fields and unknown `rail_ref` keys are rejected; keys inside `labels` and `evidence[].value` are open, and receivers ignore the ones they do not use. v0.x may change between minors until v1.0.
 
 The `sha256` values in the examples are placeholders; real events carry the digest of their evidence value.
 

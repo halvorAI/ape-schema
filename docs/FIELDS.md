@@ -107,6 +107,13 @@ Generated from [`ape/v0.1.json`](../ape/v0.1.json).
 - If `payment.status` is `failed`, `payment.failure_reason` is required.
 - `payee` needs at least one of `name`, `wallet` or `id`.
 - Each `evidence[]` item has exactly one of `value` or `uri`.
-- `payment.rail_ref` accepts only the keys listed for the event's rail.
-- Unknown top-level fields are rejected. Unknown keys in `labels`, `rail_ref` and `evidence[].value` are ignored by receivers.
-- Receivers also reject free-text fields containing a Luhn-valid 13 to 19 digit sequence (a possible card number). JSON Schema cannot express this check.
+- `payment.rail_ref` accepts only the keys listed for the event's rail. An unknown `rail_ref` key is rejected, like an unknown top-level field. A new key arrives with a new `ape_version`, and receivers pick the schema by that version.
+- `labels` and `evidence[].value` are open: any keys are allowed, and receivers ignore the ones they do not use.
+- Free-text fields must not contain a possible card number: a run of 13 to 19 digits, with single spaces or dashes allowed between digits, that passes the Luhn check. Producers redact such runs before signing (as `[redacted:pan]`); receivers reject an event that still has one, with `pan_detected`. JSON Schema cannot express this check. The free-text fields are exactly:
+  - `payment.description`, `payment.category`, `payment.failure_reason`
+  - `instruction.summary`
+  - `agent.name`, `owner.display_name`
+  - `payee.name`, `payee.website`, `payee.resource_url`
+  - every key and every value of `labels`
+
+  Identifiers are not free text and are never checked or redacted: ids, `payment.payment_id`, every `rail_ref` value, `instrument.*` and `related.*`. Card networks issue numeric transaction ids that pass the Luhn check about one time in ten, so checking them would corrupt or reject real events. `evidence[].value` is not checked either: it is a third party's proof, carried verbatim, and changing it would break its signature.
