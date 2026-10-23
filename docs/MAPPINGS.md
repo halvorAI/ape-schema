@@ -46,7 +46,8 @@ Notation: `src.path → ape.path`. "verbatim" means the whole object also goes i
 | `SettlementResponse.transaction` | `payment.rail_ref.tx_hash` |
 | `SettlementResponse.amount` | overrides `payment.amount.value` (actual amount for `upto`) |
 | `SettlementResponse.errorReason` | event `payment.failed`, `payment.failure_reason` |
-| `payment_id` | `x402:<network>:<nonce>` |
+| `payment_id` on `payment.authorized`, `payment.settled`, `payment.failed` | `x402:<network>:<nonce>`, the same on every stage so the events of one payment join. Never the transaction hash, which only exists once it settles. |
+| `payment_id` on `payment.requested` | `x402:<network>:requested:<event id>`. No nonce exists before the client signs, and a fixed `x402:<network>:requested` would give every challenge on a network the same id. The `payment.authorized` event that answers the challenge sets `related.previous_event_id` to the requested event's `id`. |
 
 ### 5.2 Stripe (PaymentIntents and Issuing)
 
