@@ -5,6 +5,7 @@ An open, rail-neutral record of one AI agent payment: which agent paid, for whom
 - **Schema:** [`ape/v0.1.json`](ape/v0.1.json), JSON Schema 2020-12. Canonical URL: `https://schema.halvorai.com/ape/v0.1.json`.
 - **Fields:** [`docs/FIELDS.md`](docs/FIELDS.md), generated from the schema.
 - **Mappings** to AP2, Mastercard Verifiable Intent, Visa Trusted Agent Protocol, x402 v2, MPP and Stripe: [`docs/MAPPINGS.md`](docs/MAPPINGS.md).
+- **SDK behaviour** every HalvorAI SDK shares (building, redaction, signing, delivery, spool): [`docs/SDK.md`](docs/SDK.md).
 - **Examples:** [`examples/`](examples/): x402 settled, Stripe Issuing authorization with AP2 and TAP evidence, Stripe failed payment.
 
 ## Design goals
