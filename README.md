@@ -29,6 +29,8 @@ npx -y -p ajv-cli@5 -p ajv-formats@3 ajv validate --spec=draft2020 --strict=fals
 x402-settled.json valid
 ```
 
+On Windows PowerShell, type `curl.exe` and `npx.cmd` in place of `curl` and `npx`.
+
 Now break it: amounts are strings of minor or atomic units, never JSON numbers. Change `"value": "10000"` to `"value": 10000` in the file and run the last command again with `--errors=text`:
 
 ```text
