@@ -12,10 +12,11 @@ A producer SDK that redacts before validating should run `events.json` through i
 
 ## Status of the SDKs
 
-Run on 2026-10-23 against this revision.
+Run on 2026-11-18 against this revision.
 
 | Implementation | `events.json` | Differences |
 | --- | --- | --- |
-| `halvorai_ingest` (Dart) | 40 / 40 | none |
-| `@halvorai/ingest` (Node.js, zod model) | 37 / 40 | Not yet checking `payee.website`, `payee.resource_url` and label keys for card numbers |
-| `halvorai-ingest` (Python) | 36 / 40 | The same three, and it accepts `null` for optional fields (`null-optional-field`) |
+| [`@halvorai/ingest`](https://github.com/halvorAI/ingest-js) (Node.js) | 40 / 40 | none |
+| [`halvorai-ingest`](https://github.com/halvorAI/ingest-python) (Python) | 40 / 40 | none |
+
+Both SDKs keep a copy of these files in their own test fixtures; the copies matched this revision on that date. The Go and Java SDKs are frozen, and the Dart SDK is archived.
