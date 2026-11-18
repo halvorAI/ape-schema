@@ -58,3 +58,27 @@ b+=harrow(xl+bw+2,xr-2,ys[0]+bh/2,"d","dh")
 b+=f'<text class="s" x="{xl}" y="{ys[2]+bh+40}">The SDK observes read-only. HalvorAI is never</text>'
 b+=f'<text class="s" x="{xl}" y="{ys[2]+bh+60}">in the payment path and cannot slow or block it.</text>'
 open(os.path.join(out,"hero-narrow.svg"),"w").write(svg(W,H,b,TITLE))
+
+# fields: the shape of one APE event inside its signed envelope
+W,H=960,430
+FALT="One APE event inside a signed envelope. Header fields: ape_version, id, type, occurred_at, environment. Who paid: agent and owner (required), instruction. What was paid: payment and payee (required), instrument. Proof: source (required, who signed) and evidence, the network proofs attached verbatim such as an AP2 mandate, Verifiable Intent, a Visa TAP signature or an x402 payload. Links: related and labels. The envelope's sig is a detached JWS (EdDSA) over the JCS canonical form of the event."
+b=f'<text class="k" x="40" y="44">SIGNED ENVELOPE</text>'
+b+=f'<rect class="box" x="40" y="58" width="880" height="292" rx="12"/>'
+b+=f'<text class="k" x="60" y="86">EVENT</text>'
+b+=f'<text class="s" x="60" y="110">ape_version* · id* · type* · occurred_at* · environment*</text>'
+cols=[("WHO PAID",[("agent*","id, name, framework, key"),("owner*","person or business"),("instruction","hash, optional summary")]),
+      ("WHAT WAS PAID",[("payment*","rail, amount, status, rail_ref"),("payee*","merchant, API, wallet"),("instrument","card token or wallet")]),
+      ("PROOF",[("source*","who signed this event"),("evidence[]","network proofs, verbatim")]),
+      ("LINKS",[("related","previous, corrected"),("labels","your own keys")])]
+cw=200; gap=13; x0=60
+for i,(head,items) in enumerate(cols):
+    x=x0+i*(cw+gap)
+    b+=f'<text class="k" x="{x}" y="140">{head}</text>'
+    for j,(t,s) in enumerate(items):
+        y=152+j*62
+        b+=box(x,y,cw,52,t,s,cls="hb" if head=="PROOF" else "box").replace(f'y="{y+28}"',f'y="{y+22}"').replace(f'y="{y+50}"',f'y="{y+42}"')
+b+=f'<rect class="hb" x="40" y="370" width="880" height="40" rx="10"/>'
+b+=f'<text class="t" x="60" y="396">sig</text><text class="s" x="96" y="396">detached JWS, EdDSA, over the JCS canonical event. Receivers chain events.</text>'
+b+=f'<text class="s" x="{W-160}" y="44">* required</text>'
+s=svg(W,H,b,"The shape of an Agent Payment Event").replace(ALT,FALT)
+open(os.path.join(out,"fields.svg"),"w").write(s)
