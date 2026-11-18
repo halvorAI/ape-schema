@@ -45,9 +45,11 @@ An envelope is `{ "event": { ... }, "sig": "<detached JWS>" }`. The JWS header i
 
 The `sha256` values in the examples are placeholders; real events carry the digest of their evidence value.
 
-## Feedback
+## Contributing
 
-Open an issue, or write to hello@halvorai.com. Open questions for reviewers are in the issue tracker.
+Rail mappings, examples, conformance cases and doc fixes are welcome. [CONTRIBUTING.md](CONTRIBUTING.md) explains how to run the checks, what is in scope and how quickly we respond. Starter tasks are labeled [`good first issue`](https://github.com/halvorAI/ape-schema/labels/good%20first%20issue).
+
+Questions and open design points go in the [issue tracker](https://github.com/halvorAI/ape-schema/issues). Report vulnerabilities privately; see [SECURITY.md](SECURITY.md).
 
 ## License
 
