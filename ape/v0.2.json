@@ -1,0 +1,1691 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schema.halvorai.com/ape/v0.2.json",
+  "title": "Agent Payment Event (APE) v0.2",
+  "description": "APE v0.2: v0.1 plus optional fields (unknown owner, attribution gaps, observer perspective, delivery, payer amount and fees, checkout digest, intermediary, receipt key, normalised instruction hash, chain.receipt and tool.response evidence) and the agent.reported event. Every field added in v0.2 is optional. See specs/02-ape-schema.md section 6.1.",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ape_version",
+        "id",
+        "type",
+        "occurred_at",
+        "environment",
+        "source",
+        "agent",
+        "owner",
+        "payment",
+        "payee"
+      ],
+      "properties": {
+        "ape_version": {
+          "const": "0.2"
+        },
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "minLength": 8
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "environment": {
+          "enum": [
+            "test",
+            "live"
+          ]
+        },
+        "source": {
+          "type": "object",
+          "required": [
+            "id",
+            "sdk",
+            "adapter"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "sdk": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "adapter": {
+              "enum": [
+                "stripe",
+                "stripe-issuing",
+                "x402-client",
+                "x402-server",
+                "mpp-server",
+                "mcp",
+                "manual",
+                "custom"
+              ]
+            },
+            "perspective": {
+              "enum": [
+                "payer",
+                "payee",
+                "facilitator",
+                "network"
+              ]
+            }
+          }
+        },
+        "agent": {
+          "type": "object",
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "name": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "framework": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "version": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "key_thumbprint": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "kya": {
+              "type": "object",
+              "required": [
+                "provider",
+                "subject"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "provider": {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                "subject": {
+                  "type": "string",
+                  "maxLength": 256
+                },
+                "assurance": {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                "verified_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        },
+        "owner": {
+          "type": "object",
+          "required": [
+            "id",
+            "type"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "type": {
+              "enum": [
+                "person",
+                "business",
+                "unknown"
+              ]
+            },
+            "display_name": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "country": {
+              "type": "string",
+              "pattern": "^[A-Z]{2}$"
+            },
+            "kyc_ref": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "unknown_reason": {
+              "enum": [
+                "not_visible_to_observer",
+                "not_provided"
+              ]
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "required": [
+                  "unknown_reason"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "type": {
+                    "const": "unknown"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "type": "object",
+            "required": [
+              "kind",
+              "format",
+              "sha256"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "enum": [
+                  "ap2.payment_mandate",
+                  "ap2.checkout_mandate",
+                  "vi.chain",
+                  "tap.signature",
+                  "x402.payment_payload",
+                  "x402.settlement",
+                  "mpp.receipt",
+                  "stripe.object",
+                  "agentic_token.metadata",
+                  "kya.attestation",
+                  "chain.receipt",
+                  "tool.response"
+                ]
+              },
+              "format": {
+                "enum": [
+                  "sd-jwt",
+                  "kb-sd-jwt",
+                  "jws",
+                  "http-signature",
+                  "json"
+                ]
+              },
+              "value": {
+                "type": [
+                  "string",
+                  "object"
+                ]
+              },
+              "uri": {
+                "type": "string",
+                "format": "uri"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "captured_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "oneOf": [
+              {
+                "required": [
+                  "value"
+                ]
+              },
+              {
+                "required": [
+                  "uri"
+                ]
+              }
+            ]
+          }
+        },
+        "related": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "previous_event_id": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "corrects_event_id": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "session_id": {
+              "type": "string",
+              "maxLength": 128
+            }
+          }
+        },
+        "labels": {
+          "type": "object",
+          "maxProperties": 20,
+          "propertyNames": {
+            "maxLength": 64
+          },
+          "additionalProperties": {
+            "type": "string",
+            "maxLength": 256
+          }
+        },
+        "type": {
+          "enum": [
+            "payment.requested",
+            "payment.authorized",
+            "payment.settled",
+            "payment.failed",
+            "payment.refunded",
+            "payment.disputed"
+          ]
+        },
+        "instruction": {
+          "type": "object",
+          "required": [
+            "id",
+            "hash"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "summary": {
+              "type": "string",
+              "maxLength": 500
+            },
+            "channel": {
+              "enum": [
+                "chat",
+                "api",
+                "schedule",
+                "email",
+                "agent",
+                "other"
+              ]
+            },
+            "issued_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "tool_call_id": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "normalised_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "normalisation": {
+              "enum": [
+                "ws-lower-v1"
+              ]
+            }
+          },
+          "dependentRequired": {
+            "normalised_hash": [
+              "normalisation"
+            ],
+            "normalisation": [
+              "normalised_hash"
+            ]
+          }
+        },
+        "payment": {
+          "type": "object",
+          "required": [
+            "payment_id",
+            "rail",
+            "amount",
+            "status",
+            "rail_ref"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "payment_id": {
+              "type": "string",
+              "maxLength": 256
+            },
+            "rail": {
+              "enum": [
+                "stripe",
+                "card",
+                "x402",
+                "mpp",
+                "stablecoin",
+                "bank_transfer"
+              ]
+            },
+            "amount": {
+              "type": "object",
+              "required": [
+                "value",
+                "unit"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "pattern": "^(0|[1-9][0-9]*)$"
+                },
+                "unit": {
+                  "enum": [
+                    "minor",
+                    "atomic"
+                  ]
+                },
+                "currency": {
+                  "type": "string",
+                  "pattern": "^[A-Z]{3}$"
+                },
+                "asset": {
+                  "type": "object",
+                  "required": [
+                    "network",
+                    "address"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "network": {
+                      "type": "string",
+                      "pattern": "^[-a-z0-9]{3,8}:[-_a-zA-Z0-9]{1,32}$",
+                      "description": "CAIP-2 chain id"
+                    },
+                    "address": {
+                      "type": "string",
+                      "maxLength": 128
+                    },
+                    "symbol": {
+                      "type": "string",
+                      "maxLength": 16
+                    },
+                    "decimals": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 36
+                    }
+                  }
+                }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "unit": {
+                        "const": "minor"
+                      }
+                    }
+                  },
+                  "then": {
+                    "required": [
+                      "currency"
+                    ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "unit": {
+                        "const": "atomic"
+                      }
+                    }
+                  },
+                  "then": {
+                    "required": [
+                      "asset"
+                    ]
+                  }
+                }
+              ]
+            },
+            "status": {
+              "enum": [
+                "requested",
+                "authorized",
+                "settled",
+                "failed",
+                "refunded",
+                "disputed"
+              ]
+            },
+            "failure_reason": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "description": {
+              "type": "string",
+              "maxLength": 256
+            },
+            "category": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "rail_ref": {
+              "type": "object"
+            },
+            "payer_amount": {
+              "type": "object",
+              "required": [
+                "value",
+                "unit"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "pattern": "^(0|[1-9][0-9]*)$"
+                },
+                "unit": {
+                  "enum": [
+                    "minor",
+                    "atomic"
+                  ]
+                },
+                "currency": {
+                  "type": "string",
+                  "pattern": "^[A-Z]{3}$"
+                },
+                "asset": {
+                  "type": "object",
+                  "required": [
+                    "network",
+                    "address"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "network": {
+                      "type": "string",
+                      "pattern": "^[-a-z0-9]{3,8}:[-_a-zA-Z0-9]{1,32}$",
+                      "description": "CAIP-2 chain id"
+                    },
+                    "address": {
+                      "type": "string",
+                      "maxLength": 128
+                    },
+                    "symbol": {
+                      "type": "string",
+                      "maxLength": 16
+                    },
+                    "decimals": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 36
+                    }
+                  }
+                }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "unit": {
+                        "const": "minor"
+                      }
+                    }
+                  },
+                  "then": {
+                    "required": [
+                      "currency"
+                    ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "unit": {
+                        "const": "atomic"
+                      }
+                    }
+                  },
+                  "then": {
+                    "required": [
+                      "asset"
+                    ]
+                  }
+                }
+              ]
+            },
+            "fees": {
+              "type": "array",
+              "maxItems": 8,
+              "items": {
+                "type": "object",
+                "required": [
+                  "kind",
+                  "amount"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "bridge",
+                      "network",
+                      "slippage",
+                      "platform",
+                      "fx",
+                      "other"
+                    ]
+                  },
+                  "amount": {
+                    "type": "object",
+                    "required": [
+                      "value",
+                      "unit"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "value": {
+                        "type": "string",
+                        "pattern": "^(0|[1-9][0-9]*)$"
+                      },
+                      "unit": {
+                        "enum": [
+                          "minor",
+                          "atomic"
+                        ]
+                      },
+                      "currency": {
+                        "type": "string",
+                        "pattern": "^[A-Z]{3}$"
+                      },
+                      "asset": {
+                        "type": "object",
+                        "required": [
+                          "network",
+                          "address"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                          "network": {
+                            "type": "string",
+                            "pattern": "^[-a-z0-9]{3,8}:[-_a-zA-Z0-9]{1,32}$",
+                            "description": "CAIP-2 chain id"
+                          },
+                          "address": {
+                            "type": "string",
+                            "maxLength": 128
+                          },
+                          "symbol": {
+                            "type": "string",
+                            "maxLength": 16
+                          },
+                          "decimals": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 36
+                          }
+                        }
+                      }
+                    },
+                    "allOf": [
+                      {
+                        "if": {
+                          "properties": {
+                            "unit": {
+                              "const": "minor"
+                            }
+                          }
+                        },
+                        "then": {
+                          "required": [
+                            "currency"
+                          ]
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "unit": {
+                              "const": "atomic"
+                            }
+                          }
+                        },
+                        "then": {
+                          "required": [
+                            "asset"
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "checkout_digest": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{43}$"
+            },
+            "intermediary": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "maxLength": 128
+                },
+                "id": {
+                  "type": "string",
+                  "maxLength": 128
+                },
+                "ref_tag": {
+                  "type": "string",
+                  "maxLength": 128
+                }
+              }
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "rail": {
+                    "const": "stripe"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "rail_ref": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "account": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "payment_intent": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "charge": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "refund": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "dispute": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "shared_payment_token": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "rail": {
+                    "const": "card"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "rail_ref": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "authorization_id": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "transaction_id": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "network_transaction_id": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "processor": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "rail": {
+                    "const": "x402"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "rail_ref": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "scheme": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "network": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "nonce": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "tx_hash": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "facilitator": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "payment_flow": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "submitter": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "rail": {
+                    "const": "mpp"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "rail_ref": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "method": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "challenge_id": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "payment_intent": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "tx_hash": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "rail": {
+                    "const": "stablecoin"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "rail_ref": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "network": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "tx_hash": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "log_index": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "submitter": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "rail": {
+                    "const": "bank_transfer"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "rail_ref": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "scheme": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "end_to_end_id": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "pisp": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "status": {
+                    "const": "failed"
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "failure_reason"
+                ]
+              }
+            }
+          ]
+        },
+        "payee": {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "enum": [
+                "merchant",
+                "api_provider",
+                "wallet",
+                "business",
+                "person"
+              ]
+            },
+            "name": {
+              "type": "string",
+              "maxLength": 256
+            },
+            "id": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "website": {
+              "type": "string",
+              "format": "uri"
+            },
+            "country": {
+              "type": "string",
+              "pattern": "^[A-Z]{2}$"
+            },
+            "mcc": {
+              "type": "string",
+              "pattern": "^[0-9]{4}$"
+            },
+            "wallet": {
+              "type": "object",
+              "required": [
+                "network",
+                "address"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "network": {
+                  "type": "string",
+                  "pattern": "^[-a-z0-9]{3,8}:[-_a-zA-Z0-9]{1,32}$",
+                  "description": "CAIP-2 chain id"
+                },
+                "address": {
+                  "type": "string",
+                  "maxLength": 128
+                }
+              }
+            },
+            "resource_url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "receipt_key": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "kid": {
+                  "type": "string",
+                  "maxLength": 128
+                },
+                "jwk": {
+                  "type": "object"
+                },
+                "jwks_uri": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              }
+            }
+          },
+          "anyOf": [
+            {
+              "required": [
+                "name"
+              ]
+            },
+            {
+              "required": [
+                "wallet"
+              ]
+            },
+            {
+              "required": [
+                "id"
+              ]
+            }
+          ]
+        },
+        "instrument": {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "enum": [
+                "card",
+                "agentic_token",
+                "stripe_spt",
+                "wallet",
+                "bank_account"
+              ]
+            },
+            "network": {
+              "type": "string",
+              "maxLength": 32
+            },
+            "last4": {
+              "type": "string",
+              "pattern": "^[0-9]{4}$"
+            },
+            "par": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "token_ref": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "wallet": {
+              "type": "object",
+              "required": [
+                "network",
+                "address"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "network": {
+                  "type": "string",
+                  "pattern": "^[-a-z0-9]{3,8}:[-_a-zA-Z0-9]{1,32}$",
+                  "description": "CAIP-2 chain id"
+                },
+                "address": {
+                  "type": "string",
+                  "maxLength": 128
+                }
+              }
+            },
+            "issuer": {
+              "type": "string",
+              "maxLength": 128
+            }
+          }
+        },
+        "attribution_gaps": {
+          "type": "array",
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "required": [
+              "field",
+              "reason"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "field": {
+                "enum": [
+                  "owner",
+                  "agent",
+                  "instruction",
+                  "mandate"
+                ]
+              },
+              "reason": {
+                "enum": [
+                  "not_visible_to_observer",
+                  "not_provided"
+                ]
+              }
+            }
+          }
+        },
+        "delivery": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "request_sha256": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "response_sha256": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "response_bytes": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "http_status": {
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 599
+            },
+            "summary": {
+              "type": "string",
+              "maxLength": 256
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ape_version",
+        "id",
+        "type",
+        "occurred_at",
+        "environment",
+        "source",
+        "agent",
+        "owner",
+        "instruction",
+        "report"
+      ],
+      "properties": {
+        "ape_version": {
+          "const": "0.2"
+        },
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "minLength": 8
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "environment": {
+          "enum": [
+            "test",
+            "live"
+          ]
+        },
+        "source": {
+          "type": "object",
+          "required": [
+            "id",
+            "sdk",
+            "adapter"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "sdk": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "adapter": {
+              "enum": [
+                "stripe",
+                "stripe-issuing",
+                "x402-client",
+                "x402-server",
+                "mpp-server",
+                "mcp",
+                "manual",
+                "custom"
+              ]
+            },
+            "perspective": {
+              "enum": [
+                "payer",
+                "payee",
+                "facilitator",
+                "network"
+              ]
+            }
+          }
+        },
+        "agent": {
+          "type": "object",
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "name": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "framework": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "version": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "key_thumbprint": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "kya": {
+              "type": "object",
+              "required": [
+                "provider",
+                "subject"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "provider": {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                "subject": {
+                  "type": "string",
+                  "maxLength": 256
+                },
+                "assurance": {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                "verified_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        },
+        "owner": {
+          "type": "object",
+          "required": [
+            "id",
+            "type"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "type": {
+              "enum": [
+                "person",
+                "business",
+                "unknown"
+              ]
+            },
+            "display_name": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "country": {
+              "type": "string",
+              "pattern": "^[A-Z]{2}$"
+            },
+            "kyc_ref": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "unknown_reason": {
+              "enum": [
+                "not_visible_to_observer",
+                "not_provided"
+              ]
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "required": [
+                  "unknown_reason"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "type": {
+                    "const": "unknown"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "type": "object",
+            "required": [
+              "kind",
+              "format",
+              "sha256"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "enum": [
+                  "ap2.payment_mandate",
+                  "ap2.checkout_mandate",
+                  "vi.chain",
+                  "tap.signature",
+                  "x402.payment_payload",
+                  "x402.settlement",
+                  "mpp.receipt",
+                  "stripe.object",
+                  "agentic_token.metadata",
+                  "kya.attestation",
+                  "chain.receipt",
+                  "tool.response"
+                ]
+              },
+              "format": {
+                "enum": [
+                  "sd-jwt",
+                  "kb-sd-jwt",
+                  "jws",
+                  "http-signature",
+                  "json"
+                ]
+              },
+              "value": {
+                "type": [
+                  "string",
+                  "object"
+                ]
+              },
+              "uri": {
+                "type": "string",
+                "format": "uri"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              "captured_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "oneOf": [
+              {
+                "required": [
+                  "value"
+                ]
+              },
+              {
+                "required": [
+                  "uri"
+                ]
+              }
+            ]
+          }
+        },
+        "related": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "previous_event_id": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "corrects_event_id": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "session_id": {
+              "type": "string",
+              "maxLength": 128
+            }
+          }
+        },
+        "labels": {
+          "type": "object",
+          "maxProperties": 20,
+          "propertyNames": {
+            "maxLength": 64
+          },
+          "additionalProperties": {
+            "type": "string",
+            "maxLength": 256
+          }
+        },
+        "type": {
+          "const": "agent.reported"
+        },
+        "instruction": {
+          "type": "object",
+          "required": [
+            "id",
+            "hash"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "summary": {
+              "type": "string",
+              "maxLength": 500
+            },
+            "channel": {
+              "enum": [
+                "chat",
+                "api",
+                "schedule",
+                "email",
+                "agent",
+                "other"
+              ]
+            },
+            "issued_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "tool_call_id": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "normalised_hash": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "normalisation": {
+              "enum": [
+                "ws-lower-v1"
+              ]
+            }
+          },
+          "dependentRequired": {
+            "normalised_hash": [
+              "normalisation"
+            ],
+            "normalisation": [
+              "normalised_hash"
+            ]
+          }
+        },
+        "attribution_gaps": {
+          "type": "array",
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "required": [
+              "field",
+              "reason"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "field": {
+                "enum": [
+                  "owner",
+                  "agent",
+                  "instruction",
+                  "mandate"
+                ]
+              },
+              "reason": {
+                "enum": [
+                  "not_visible_to_observer",
+                  "not_provided"
+                ]
+              }
+            }
+          }
+        },
+        "report": {
+          "type": "object",
+          "required": [
+            "body_sha256"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "channel": {
+              "enum": [
+                "chat",
+                "api",
+                "email",
+                "other"
+              ]
+            },
+            "summary": {
+              "type": "string",
+              "maxLength": 500
+            },
+            "payments_claimed": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "amount_claimed": {
+              "type": "object",
+              "required": [
+                "value",
+                "unit"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "pattern": "^(0|[1-9][0-9]*)$"
+                },
+                "unit": {
+                  "enum": [
+                    "minor",
+                    "atomic"
+                  ]
+                },
+                "currency": {
+                  "type": "string",
+                  "pattern": "^[A-Z]{3}$"
+                },
+                "asset": {
+                  "type": "object",
+                  "required": [
+                    "network",
+                    "address"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "network": {
+                      "type": "string",
+                      "pattern": "^[-a-z0-9]{3,8}:[-_a-zA-Z0-9]{1,32}$",
+                      "description": "CAIP-2 chain id"
+                    },
+                    "address": {
+                      "type": "string",
+                      "maxLength": 128
+                    },
+                    "symbol": {
+                      "type": "string",
+                      "maxLength": 16
+                    },
+                    "decimals": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 36
+                    }
+                  }
+                }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "unit": {
+                        "const": "minor"
+                      }
+                    }
+                  },
+                  "then": {
+                    "required": [
+                      "currency"
+                    ]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "unit": {
+                        "const": "atomic"
+                      }
+                    }
+                  },
+                  "then": {
+                    "required": [
+                      "asset"
+                    ]
+                  }
+                }
+              ]
+            },
+            "body_sha256": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

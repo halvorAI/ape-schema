@@ -1,4 +1,5 @@
-// Checks the conformance cases, the examples and the test vectors against ape/v0.1.json and
+// Checks the conformance cases, the examples and the test vectors against ape/v0.1.json (v0.2
+// examples against ape/v0.2.json) and
 // the card-number rule in docs/FIELDS.md. Run with `npm test`.
 import { readFileSync, readdirSync } from 'node:fs';
 import Ajv2020 from 'ajv/dist/2020.js';
@@ -9,7 +10,8 @@ const read = (path) => JSON.parse(readFileSync(new URL(`../${path}`, import.meta
 
 const ajv = new Ajv2020({ strict: false, allErrors: true });
 addFormats(ajv);
-const validate = ajv.compile(read('ape/v0.1.json'));
+const validate01 = ajv.compile(read('ape/v0.1.json'));
+const validate02 = ajv.compile(read('ape/v0.2.json'));
 
 // The free-text fields, exactly as docs/FIELDS.md lists them.
 function freeText(event) {
@@ -25,6 +27,8 @@ function freeText(event) {
     ...at('payee', 'name'),
     ...at('payee', 'website'),
     ...at('payee', 'resource_url'),
+    ...at('delivery', 'summary'),
+    ...at('report', 'summary'),
     ...Object.keys(labels).map((k) => ['labels (key)', k]),
     ...Object.entries(labels).filter(([, v]) => typeof v === 'string').map(([k, v]) => [`labels.${k}`, v]),
   ];
@@ -52,6 +56,7 @@ function containsPan(text) {
 
 /** 'valid', or the first rule an event breaks: 'schema' or 'pan'. */
 function verdict(event) {
+  const validate = event.ape_version === '0.2' ? validate02 : validate01;
   if (!validate(event)) return { result: 'schema', why: ajv.errorsText(validate.errors) };
   const hit = freeText(event).find(([, text]) => containsPan(text));
   if (hit) return { result: 'pan', why: `card number in ${hit[0]}` };
@@ -112,3 +117,18 @@ if (failures.length > 0) {
   process.exit(1);
 }
 console.log(`All ${passed} conformance checks passed.`);
+
+for (const file of readdirSync(new URL('../examples', import.meta.url)).filter((f) => f.endsWith('.json') && !f.includes('.v0.2.'))) {
+  const event = { ...read(`examples/${file}`), ape_version: '0.2' };
+  if (!validate02(event)) {
+    console.error(`examples/${file} as 0.2: ${ajv.errorsText(validate02.errors)}`);
+    process.exitCode = 1;
+  }
+}
+{
+  const mixed = { ...read('examples/x402-settled.json'), source: { ...read('examples/x402-settled.json').source, perspective: 'payer' } };
+  if (validate01(mixed)) {
+    console.error('a 0.1 event with source.perspective passed ape/v0.1.json');
+    process.exitCode = 1;
+  }
+}
