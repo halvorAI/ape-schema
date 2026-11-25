@@ -1,10 +1,10 @@
-# Agent Payment Event (APE) v0.1
+# Agent Payment Event (APE) v0.2
 
 <p>
 <a href="https://github.com/halvorAI/ape-schema/actions/workflows/conformance.yml"><img height="16" alt="Conformance" src="https://github.com/halvorAI/ape-schema/actions/workflows/conformance.yml/badge.svg"></a>
-<a href="https://schema.halvorai.com/ape/v0.1.json"><img height="16" alt="JSON Schema 2020-12" src="https://img.shields.io/badge/JSON%20Schema-2020--12-4A6100?style=flat-square"></a>
+<a href="https://schema.halvorai.com/ape/v0.2.json"><img height="16" alt="JSON Schema 2020-12" src="https://img.shields.io/badge/JSON%20Schema-2020--12-4A6100?style=flat-square"></a>
 <a href="https://github.com/halvorAI/ape-schema/blob/main/LICENSE"><img height="16" alt="License" src="https://img.shields.io/badge/license-Apache--2.0-4A6100?style=flat-square"></a>
-<a href="https://github.com/halvorAI/ape-schema"><img height="16" alt="APE v0.1" src="https://img.shields.io/badge/APE-v0.1-C6F432?style=flat-square&labelColor=1C1C1C"></a>
+<a href="https://github.com/halvorAI/ape-schema"><img height="16" alt="APE v0.2" src="https://img.shields.io/badge/APE-v0.2-C6F432?style=flat-square&labelColor=1C1C1C"></a>
 </p>
 
 An open, rail-neutral record of one AI agent payment: which agent paid, for whom, on whose instruction, on which rail, and the network proofs that came with it.
@@ -13,16 +13,23 @@ It's for anyone who produces or receives agent payment records: agent wallets, a
 
 <p align="center"><img src="assets/figures/fields.svg" alt="One APE event inside a signed envelope. Header fields: ape_version, id, type, occurred_at, environment. Who paid: agent and owner (required), instruction. What was paid: payment and payee (required), instrument. Proof: source (required, who signed) and evidence, the network proofs attached verbatim such as an AP2 mandate, Verifiable Intent, a Visa TAP signature or an x402 payload. Links: related and labels. The envelope's sig is a detached JWS (EdDSA) over the JCS canonical form of the event."></p>
 
-Canonical URL: `https://schema.halvorai.com/ape/v0.1.json`. Source: [`ape/v0.1.json`](ape/v0.1.json).
+Canonical URL: `https://schema.halvorai.com/ape/v0.2.json`. Source: [`ape/v0.2.json`](ape/v0.2.json). v0.1 stays published at `https://schema.halvorai.com/ape/v0.1.json`, and every v0.1 event is still valid.
+
+**New in v0.2** (all optional; see [`CHANGELOG.md`](CHANGELOG.md)):
+- **Who saw the payment.** An unknown owner type, `attribution_gaps` and `source.perspective`.
+- **What it cost and bought.** `payment.payer_amount` and `payment.fees`, `payment.checkout_digest`, `payment.intermediary`, and `delivery`.
+- **Matching runs.** A normalised instruction hash.
+- **New evidence kinds.** `tool.response` and `chain.receipt`.
+- **A new event.** `agent.reported`, for what the agent told its owner.
 
 ## Try it
 
 Validate an example event against the published schema. You need Node.js 18 or later; there is nothing to clone:
 
 ```bash
-curl -sO https://schema.halvorai.com/ape/v0.1.json
+curl -sO https://schema.halvorai.com/ape/v0.2.json
 curl -sO https://raw.githubusercontent.com/halvorAI/ape-schema/main/examples/x402-settled.json
-npx -y -p ajv-cli@5 -p ajv-formats@3 ajv validate --spec=draft2020 --strict=false -c ajv-formats -s v0.1.json -d x402-settled.json
+npx -y -p ajv-cli@5 -p ajv-formats@3 ajv validate --spec=draft2020 --strict=false -c ajv-formats -s v0.2.json -d x402-settled.json
 ```
 
 ```text
@@ -143,7 +150,7 @@ data/payment/amount/value must be string
 ```js
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
-import schema from './ape/v0.1.json' with { type: 'json' };
+import schema from './ape/v0.2.json' with { type: 'json' };
 
 const ajv = new Ajv2020({ strict: false });
 addFormats(ajv);
@@ -180,7 +187,7 @@ All 82 conformance checks passed.
 
 ## Signing
 
-An envelope is `{ "event": { ... }, "sig": "<detached JWS>" }`. The JWS header is `{"alg":"EdDSA","kid":"<source id>","typ":"ape+jws","ape":"0.1"}` and the payload is the RFC 8785 (JCS) canonical form of `event`, detached per RFC 7515 Appendix F.
+An envelope is `{ "event": { ... }, "sig": "<detached JWS>" }`. The JWS header is `{"alg":"EdDSA","kid":"<source id>","typ":"ape+jws","ape":"0.2"}` (`ape` is the event's `ape_version`) and the payload is the RFC 8785 (JCS) canonical form of `event`, detached per RFC 7515 Appendix F.
 
 <a name="validate-an-event"></a>
 
@@ -204,7 +211,7 @@ The `sha256` values in the examples are placeholders; real events carry the dige
 Projects that emit or accept APE events can show it with this badge:
 
 ```markdown
-[![APE v0.1](https://img.shields.io/badge/APE-v0.1-C6F432?style=flat-square&labelColor=1C1C1C)](https://github.com/halvorAI/ape-schema)
+[![APE v0.2](https://img.shields.io/badge/APE-v0.2-C6F432?style=flat-square&labelColor=1C1C1C)](https://github.com/halvorAI/ape-schema)
 ```
 
 ## Contributing
